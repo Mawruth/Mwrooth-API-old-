@@ -31,3 +31,7 @@ func (u *UserService) GetUser(id int) (*models.User, error) {
 func (u *UserService) CreateUser(user *models.User) (*models.User, error) {
 	return u.userRepository.Create(user)
 }
+
+func (u *UserService) Login(email, password string) (string, error) {
+	return u.userRepository.Login(email, password)
+}
