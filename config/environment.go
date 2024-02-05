@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"sync"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"os"
-	"sync"
 )
 
 var (
@@ -38,9 +39,10 @@ func LoadConfig() (*Config, error) {
 	var err error
 	once.Do(func() {
 		dsn := fmt.Sprintf(
-			"host=localhost user=%s password=%s dbname=%s port=%s sslmode=disable",
-			os.Getenv("POSTGRES_USERNAME"),
-			os.Getenv("POSTGRES_PASSWORD"),
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=require",
+			os.Getenv("DB_HOST"),
+			os.Getenv("DB_USER"),
+			os.Getenv("DB_PASS"),
 			os.Getenv("DB_NAME"),
 			os.Getenv("DB_PORT"),
 		)

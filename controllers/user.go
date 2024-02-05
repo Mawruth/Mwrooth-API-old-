@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"main/errorHandling"
 	"main/models"
 	"main/services"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type UserController struct {
