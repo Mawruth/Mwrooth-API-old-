@@ -18,10 +18,10 @@ func NewMuseumService() *MuseumService {
 
 func (m *MuseumService) CreateMuseum(museum req.MuseumReq) (*models.Museum, error) {
 
-	// find all types by ids from database 
+	// find all types by ids from database
 	var types []models.Type
 	for _, id := range museum.Types {
-		type_,_ := NewTypeService().typeRepository.GetById(id)
+		type_, _ := NewTypeService().typeRepository.GetById(id)
 		types = append(types, type_)
 	}
 
@@ -45,4 +45,8 @@ func (m *MuseumService) CreateMuseum(museum req.MuseumReq) (*models.Museum, erro
 	}
 
 	return m.museumRepository.Create(&newMuseum)
+}
+
+func (m *MuseumService) GetAll() ([]*models.Museum, error) {
+	return m.museumRepository.GetAll()
 }
