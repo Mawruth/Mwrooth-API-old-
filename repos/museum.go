@@ -24,4 +24,7 @@ func (r *MuseumRepository) Create(museum *models.Museum) (*models.Museum, error)
 	return museum, nil
 }
 
-
+func (r *MuseumRepository) GetAll() ([]*models.Museum, error) {
+	var museums []*models.Museum
+	return museums, r.db.Preload("Types").Preload("Images").Find(&museums).Error
+}

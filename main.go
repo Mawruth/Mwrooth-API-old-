@@ -26,7 +26,7 @@ func main() {
 	PORT := config.API_PORT
 
 	if err := config.DB.AutoMigrate(
-		&models.User{},&models.Category{},&models.Type{},&models.Museum{},&models.Piece{},&models.PieceImages{},
+		&models.User{}, &models.Category{}, &models.Type{}, &models.Museum{}, &models.Piece{}, &models.PieceImages{}, &models.MuseumImages{},
 	); err != nil {
 		log.Fatalf("Error running migrations: %s", err.Error())
 	}
