@@ -24,6 +24,8 @@ func SetupUserRoutes(router fiber.Router) {
 	router.Get("/:id", userController.GetUser)
 	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
 	router.Post("/login", userController.Login)
+	router.Post("/otp/verify", userController.VerifyOTP)
+	router.Post("/otp/resend", userController.ResendOTP)
 }
 
 func (uc *UserController) GetUser(c *fiber.Ctx) error {
@@ -61,7 +63,43 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 	if err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}
+
 	return c.JSON(map[string]string{
 		"token": result,
+	})
+}
+
+func (uc *UserController) VerifyOTP(c *fiber.Ctx) error {
+	var body fiber.Map
+	if err := c.BodyParser(&body); err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
+	if _, ok := body["email"].(string); !ok {
+		return errorHandling.HandleHTTPError(c, errors.New("Enter a valid email"))
+	}
+	if _, ok := body["otp"].(string); !ok {
+		return errorHandling.HandleHTTPError(c, errors.New("Enter a valid otp"))
+	}
+	if err := uc.userService.VerifyOTP(body["email"].(string), body["otp"].(string)); err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "OTP verified",
+	})
+}
+
+func (uc *UserController) ResendOTP(c *fiber.Ctx) error {
+	var body fiber.Map
+	if err := c.BodyParser(&body); err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	if err := uc.userService.ResendOTP(body["email"].(string)); err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "OTP resent",
 	})
 }
