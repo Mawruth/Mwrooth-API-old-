@@ -2,12 +2,11 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"sync"
-
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
+	"sync"
 )
 
 var (
