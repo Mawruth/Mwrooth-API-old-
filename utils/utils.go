@@ -39,12 +39,11 @@ func GenerateVerificationMessage(code string) []byte {
 		fmt.Println(err.Error())
 		return nil
 	}
-	return []byte(fmt.Sprintf("%s\n\n%s", string(msg), code))
+	return []byte(fmt.Sprintf("%s\n\n\n%s", string(msg), code))
 }
 
 func GenerateOTP() string {
-	code := rand.Intn(9)*1000 + rand.Intn(9)*100 + rand.Intn(9)*10
-	code += time.Now().Second()%9 + 1
+	code := rand.Intn(10000)
 	return fmt.Sprintf("%d", code)
 }
 

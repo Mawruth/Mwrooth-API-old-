@@ -2,12 +2,12 @@ package services
 
 import (
 	"errors"
+	"gopkg.in/gomail.v2"
 	"main/models"
 	"main/repos"
 	"main/utils"
-	"net"
-	"net/smtp"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -35,14 +35,15 @@ func (u *UserService) GetUser(id int) (*models.User, error) {
 }
 
 func (u *UserService) CreateUser(user *models.User) (*models.User, error) {
-	otp := utils.GenerateOTP() + "|1|"
+	rawOTP := utils.GenerateOTP()
+	otp := rawOTP + "|1|"
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	otp += timestamp
 	user.OTP = &otp
-	//verificationMsg := utils.GenerateVerificationMessage(user.OTP)
-	//if err := u.SendCode(user.Email, verificationMsg); err != nil {
-	//	return nil, err
-	//}
+	verificationMsg := utils.GenerateVerificationMessage(rawOTP)
+	if err := u.SendCode(user.Email, verificationMsg); err != nil {
+		return nil, err
+	}
 	return u.userRepository.Create(user)
 }
 
@@ -52,16 +53,15 @@ func (u *UserService) Login(email, password string) (string, error) {
 
 func (u *UserService) SendCode(email string, verificationMsg []byte) error {
 	host := os.Getenv("SMTP_HOST")
-	port := os.Getenv("SMTP_PORT")
+	port, _ := strconv.ParseInt(os.Getenv("SMTP_PORT"), 10, 32)
 	senderEmail := os.Getenv("SENDER_EMAIL")
-	auth := smtp.PlainAuth("", senderEmail, os.Getenv("SENDER_PASSWORD"), host)
-	if err := smtp.SendMail(
-		net.JoinHostPort(host, port),
-		auth,
-		senderEmail,
-		[]string{email},
-		verificationMsg,
-	); err != nil {
+	mail := gomail.NewMessage()
+	mail.SetHeader("From", senderEmail)
+	mail.SetHeader("To", email)
+	mail.SetHeader("Subject", "Verification Code")
+	mail.SetBody("text/html", string(verificationMsg))
+	dialer := gomail.NewDialer(host, int(port), senderEmail, os.Getenv("SENDER_PASSWORD"))
+	if err := dialer.DialAndSend(mail); err != nil {
 		return err
 	}
 
@@ -98,14 +98,15 @@ func (u *UserService) ResendOTP(email string) error {
 		return err
 	}
 
-	otp := utils.GenerateOTP() + "|1|"
+	rawOTP := utils.GenerateOTP()
+	otp := rawOTP + "|1|"
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	otp += timestamp
 	user.OTP = &otp
-	//verificationMsg := utils.GenerateVerificationMessage(user.OTP)
-	//if err := u.SendCode(user.Email, verificationMsg); err != nil {
-	//	return nil, err
-	//}
+	verificationMsg := utils.GenerateVerificationMessage(rawOTP)
+	if err := u.SendCode(user.Email, verificationMsg); err != nil {
+		return err
+	}
 
 	if _, err := u.userRepository.Update(user); err != nil {
 		return err
