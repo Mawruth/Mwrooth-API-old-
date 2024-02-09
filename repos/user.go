@@ -1,14 +1,12 @@
 package repos
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"main/config"
 	"main/models"
-	"os"
+	"main/utils"
 	"sync"
-	"time"
-
-	"github.com/golang-jwt/jwt/v5"
-	"gorm.io/gorm"
 )
 
 var (
@@ -50,12 +48,12 @@ func (r *UserRepository) GetByID(id int) (*models.User, error) {
 
 func (r *UserRepository) Login(email, password string) (string, error) {
 	if err := r.db.
-		Where("email = ? AND password = ?", email, password).
+		Where("email = ? AND password = ? AND otp is NULL", email, password).
 		First(&models.User{}).Error; err != nil {
-		return "", err
+		return "", errors.New("Invalid credentials")
 	}
 
-	token, err := generateToken(email)
+	token, err := utils.GenerateToken(email)
 	if err != nil {
 		return "", err
 	}
@@ -63,18 +61,19 @@ func (r *UserRepository) Login(email, password string) (string, error) {
 	return token, nil
 }
 
-func generateToken(email string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": email,
-		"role":  "USER",
-		"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
-	},
-	)
-
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
+	var user *models.User
+	err := r.db.First(&user, "email = ?", email).Error
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	return user, nil
+}
 
-	return tokenString, nil
+func (r *UserRepository) Update(user *models.User) (*models.User, error) {
+	err := r.db.Save(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
