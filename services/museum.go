@@ -4,6 +4,8 @@ import (
 	"main/data/req"
 	"main/models"
 	"main/repos"
+	"strconv"
+	"strings"
 )
 
 type MuseumService struct {
@@ -49,4 +51,29 @@ func (m *MuseumService) CreateMuseum(museum req.MuseumReq) (*models.Museum, erro
 
 func (m *MuseumService) GetAll() ([]*models.Museum, error) {
 	return m.museumRepository.GetAll()
+}
+
+func (m *MuseumService) GetByRating(ratingP string) ([]*models.Museum, error) {
+	rating, err := strconv.ParseFloat(ratingP, 32)
+	if err != nil {
+		return nil, err
+	}
+	return m.museumRepository.GetByRating(float32(rating))
+}
+
+func (m *MuseumService) GetByTypes(typesP string) ([]*models.Museum, error) {
+	typesS := strings.Split(typesP, ",")
+	types := make([]int, 0)
+	for _, t := range typesS {
+		id, err := strconv.Atoi(t)
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, id)
+	}
+	return m.museumRepository.GetByTypes(types)
+}
+
+func (m *MuseumService) GetByCity(city string) ([]*models.Museum, error) {
+	return m.museumRepository.GetByCity(city)
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 	"github.com/google/uuid"
 )
 
@@ -59,11 +60,36 @@ func (m *MuseumController) Create(c *fiber.Ctx) error {
 }
 
 func (m *MuseumController) GetAll(c *fiber.Ctx) error {
+	ratingParam := utils.CopyString(c.Query("rating"))
+	typesParam := utils.CopyString(c.Query("types"))
+	cityParam := utils.CopyString(c.Query("city"))
+
+	if ratingParam != "" {
+		museums, err := m.museumService.GetByRating(ratingParam)
+		if err != nil {
+			return errorHandling.HandleHTTPError(c, err)
+		}
+		return c.Status(fiber.StatusOK).JSON(museums)
+	}
+
+	if typesParam != "" {
+		museums, err := m.museumService.GetByTypes(typesParam)
+		if err != nil {
+			return errorHandling.HandleHTTPError(c, err)
+		}
+		return c.Status(fiber.StatusOK).JSON(museums)
+	}
+
+	if cityParam != "" {
+		museums, err := m.museumService.GetByCity(cityParam)
+		if err != nil {
+			return errorHandling.HandleHTTPError(c, err)
+		}
+		return c.Status(fiber.StatusOK).JSON(museums)
+	}
 	museums, err := m.museumService.GetAll()
 	if err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"museums": museums,
-	})
+	return c.Status(fiber.StatusOK).JSON(museums)
 }
