@@ -18,3 +18,16 @@ func NewPieceService() *PieceService {
 func (s *PieceService) CreatePiece(piece models.Piece) (*models.Piece, error) {
 	return s.pieceRepository.Create(&piece)
 }
+
+func (s *PieceService) GetAllPieces() ([]models.Piece, error) {
+	return s.pieceRepository.GetAll()
+}
+
+func (s *PieceService) GetPieceById(id int) (models.Piece, error) {
+	return s.pieceRepository.GetById(id)
+}
+
+
+func (s *PieceService) UpdatePiece(piece *models.Piece) (*models.Piece, error) {
+	return s.pieceRepository.Update(piece)
+}

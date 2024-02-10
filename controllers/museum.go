@@ -25,6 +25,7 @@ func SetupMuseumRoutes(router fiber.Router) {
 	museumController := NewMuseumController()
 	router.Post("/", museumController.Create)
 	router.Get("/", museumController.GetAll)
+	router.Get("/:id", museumController.GetByID)
 }
 
 func (m *MuseumController) Create(c *fiber.Ctx) error {
@@ -92,4 +93,13 @@ func (m *MuseumController) GetAll(c *fiber.Ctx) error {
 		return errorHandling.HandleHTTPError(c, err)
 	}
 	return c.Status(fiber.StatusOK).JSON(museums)
+}
+
+func (m *MuseumController) GetByID(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	museum, err := m.museumService.GetByID(id)
+	return c.Status(fiber.StatusOK).JSON(museum)
 }
