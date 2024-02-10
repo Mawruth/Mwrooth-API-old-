@@ -6,6 +6,7 @@ import (
 	"main/errorHandling"
 	"main/models"
 	"main/services"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,6 +25,9 @@ func NewPieceController() *PieceController {
 func SetupPieceRoute(route fiber.Router) {
 	pieceController := NewPieceController()
 	route.Post("/", pieceController.Create)
+	route.Get("/", pieceController.GetAll)
+	route.Get("/master-piece/:id", pieceController.MakeMasterPiece)
+	route.Get("/:id", pieceController.GetById)
 }
 
 func (pieceController *PieceController) Create(c *fiber.Ctx) error {
@@ -92,4 +96,42 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 		return errorHandling.HandleHTTPError(c, err)
 	}
 	return c.JSON(result)
+}
+
+func (pieceController *PieceController) GetAll(c *fiber.Ctx) error {
+	pieces, err := pieceController.pieceService.GetAllPieces()
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	return c.JSON(pieces)
+}
+
+func (pieceController *PieceController) GetById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	piece, err := pieceController.pieceService.GetPieceById(idInt)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	return c.JSON(piece)
+}
+
+func (pieceController *PieceController) MakeMasterPiece(c *fiber.Ctx) error {
+	id := c.Params("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	piece, err := pieceController.pieceService.GetPieceById(idInt)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	piece.Master_piece = true
+	if _, err := pieceController.pieceService.UpdatePiece(&piece); err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	return c.JSON(piece)
 }
