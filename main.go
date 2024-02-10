@@ -27,7 +27,7 @@ func main() {
 	PORT := config.API_PORT
 
 	if err := config.DB.AutoMigrate(
-		&models.User{}, &models.Category{}, &models.Type{}, &models.Museum{}, &models.Piece{}, &models.PieceImages{}, &models.MuseumImages{},models.Story{},
+		&models.User{}, &models.Category{}, &models.Type{}, &models.Museum{}, &models.Piece{}, &models.PieceImages{}, &models.MuseumImages{},&models.Story{},&models.Review{},
 	); err != nil {
 		log.Fatalf("Error running migrations: %s", err.Error())
 	}
@@ -37,5 +37,6 @@ func main() {
 	controllers.SetupCategoryRoutes(apiGroup.Group("categories"))
 	controllers.SetupStoryRoutes(apiGroup.Group("stories"))
 	controllers.SetupPieceRoute(apiGroup.Group("pieces"))
+	controllers.SetupReviewRoutes(apiGroup.Group("reviews"))
 	app.Listen(PORT)
 }
