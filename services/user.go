@@ -37,7 +37,7 @@ func (u *UserService) GetUser(id int) (*models.User, error) {
 func (u *UserService) CreateUser(user *models.User) (*models.User, error) {
 	rawOTP := utils.GenerateOTP()
 	otp := rawOTP + "|5|"
-	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	timestamp := time.Now().UTC().Format("2006-01-02 15:04:05")
 	otp += timestamp
 	user.OTP = &otp
 	verificationMsg := utils.GenerateVerificationMessage(rawOTP)
@@ -76,7 +76,7 @@ func (u *UserService) VerifyOTP(email, otp string) error {
 
 	rawOTP, timestampAsTime := utils.ParseOTP(*user.OTP)
 
-	if time.Now().After(timestampAsTime) {
+	if time.Now().UTC().After(timestampAsTime) {
 		return errors.New("OTP expired")
 	}
 
@@ -100,7 +100,7 @@ func (u *UserService) ResendOTP(email string) error {
 
 	rawOTP := utils.GenerateOTP()
 	otp := rawOTP + "|5|"
-	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	timestamp := time.Now().UTC().Format("2006-01-02 15:04:05")
 	otp += timestamp
 	user.OTP = &otp
 	verificationMsg := utils.GenerateVerificationMessage(rawOTP)
