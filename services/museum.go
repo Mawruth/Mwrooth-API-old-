@@ -77,3 +77,7 @@ func (m *MuseumService) GetByTypes(typesP string) ([]*models.Museum, error) {
 func (m *MuseumService) GetByCity(city string) ([]*models.Museum, error) {
 	return m.museumRepository.GetByCity(city)
 }
+
+func (m *MuseumService) GetByID(id int) (*models.Museum, error) {
+	return m.museumRepository.GetByID(id)
+}

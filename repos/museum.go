@@ -51,3 +51,7 @@ func (r *MuseumRepository) GetByCity(city string) ([]*models.Museum, error) {
 	var museums []*models.Museum
 	return museums, r.db.Where("city = ?", city).Find(&museums).Error
 }
+func (r *MuseumRepository) GetByID(id int) (*models.Museum, error) {
+	var museum *models.Museum
+	return museum, r.db.Where("id = ?", id).Preload("Types").Preload("Images").Preload("Pieces.Images").Preload("Reviews").Find(&museum).Error
+}
