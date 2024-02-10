@@ -36,7 +36,7 @@ func (u *UserService) GetUser(id int) (*models.User, error) {
 
 func (u *UserService) CreateUser(user *models.User) (*models.User, error) {
 	rawOTP := utils.GenerateOTP()
-	otp := rawOTP + "|1|"
+	otp := rawOTP + "|5|"
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	otp += timestamp
 	user.OTP = &otp
@@ -99,7 +99,7 @@ func (u *UserService) ResendOTP(email string) error {
 	}
 
 	rawOTP := utils.GenerateOTP()
-	otp := rawOTP + "|1|"
+	otp := rawOTP + "|5|"
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	otp += timestamp
 	user.OTP = &otp

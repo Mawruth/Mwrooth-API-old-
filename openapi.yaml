@@ -1,0 +1,561 @@
+openapi: 3.0.3
+info:
+  title: Mwruth API
+  description: |-
+    This is the official API documentation for Mwruth application
+  contact:
+    email: mwruth90@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+servers:
+  - url: http://dummy-url/api/v1
+tags:
+  - name: user
+    description: Everything related to users
+  - name: museum
+    description: Museum-realted information
+  - name: category
+    description: Actions related to museum categories
+  - name: type
+    description: Types of the pieces
+  - name: piece
+    description: Information about pieces of the museum
+paths:
+  /users:{userId}:
+    get:
+      tags:
+        - user
+      summary: Get an existing user
+      description: Get an existing user by id
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+  /users/register:
+    post:
+      tags:
+        - user
+      summary: Create a new user
+      description: Add a new user to the system
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+  /users/login:
+    post:
+      tags:
+        - user
+      summary: Login with existing user
+      description: Login with existing user
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: integer
+        '500':
+          description: Internal server error
+  /users/otp/verify:
+    post:
+      tags:
+        - user
+      summary: Verify OTP
+      description: Verify OTP
+      operationId: verifyOtp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /users/otp/resend:
+    post:
+      tags:
+        - user
+      summary: Resend OTP
+      description: Resend OTP
+      operationId: resendOtp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendOtpParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /museums:
+    get:
+      tags:
+        - museum
+      summary: Get all museums
+      description: Get all museums
+      operationId: getMuseums
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Museum'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    post:
+      tags:
+        - museum
+      summary: Create a new museum
+      description: Create a new museum
+      operationId: createMuseum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMuseumParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Museum'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /categories:
+    post:
+      tags:
+        - category
+      summary: Create a new category
+      description: Create a new category
+      operationId: createCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /types:
+    post:
+      tags:
+        - type
+      summary: Create a new type
+      description: Create a new type
+      operationId: createType
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTypeParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Type'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    get:
+      tags:
+        - type
+      summary: Get all types
+      description: Get all types
+      operationId: getTypes
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Type'
+
+  /pieces:
+    post:
+      tags:
+        - piece
+      summary: Create a new piece
+      description: Create a new piece
+      operationId: createPiece
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePieceParams'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Piece'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone_number:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    RegisterParams:
+      type: object
+      properties:
+        full_name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone_number:
+          type: string
+    LoginParams:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    VerifyOtpParams:
+      type: object
+      properties:
+        email:
+          type: string
+        otp:
+          type: string
+    ResendOtpParams:
+      type: object
+      properties:
+        email:
+          type: string
+    Museum:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        work_time:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        rating:
+          type: number
+        types:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        pieces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Piece'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/MuseumImage'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    Category:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        image_path:
+          type: string
+        pieces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Piece'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    Type:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        museums:
+          type: array
+          items:
+            $ref: '#/components/schemas/Museum'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    Piece:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        master_piece:
+          type: boolean
+        category_id:
+          type: integer
+        museum_id:
+          type: integer
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/PieceImage'
+        ar_path:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    PieceImage:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        image_path:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    MuseumImage:
+      type: object
+      properties:
+        ID:
+          type: integer
+          readOnly: true
+        image_path:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+    CreateMuseumParams:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        work_time:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        rating:
+          type: number
+        types:
+          type: array
+          items:
+            type: integer
+        images:
+          type: array
+          items:
+            type: string
+    CreateCategoryParams:
+      type: object
+      properties:
+        name:
+          type: string
+        image_path:
+          type: string
+    CreateTypeParams:
+      type: object
+      properties:
+        name:
+          type: string
+    CreatePieceParams:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        master_piece:
+          type: boolean
+        type_id:
+          type: integer
+        museum_id:
+          type: integer
