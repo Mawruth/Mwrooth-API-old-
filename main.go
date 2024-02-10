@@ -36,5 +36,6 @@ func main() {
 	controllers.SetupMuseumRoutes(apiGroup.Group("museums"))
 	controllers.SetupCategoryRoutes(apiGroup.Group("categories"))
 	controllers.SetupStoryRoutes(apiGroup.Group("stories"))
+	controllers.SetupPieceRoute(apiGroup.Group("pieces"))
 	app.Listen(PORT)
 }
