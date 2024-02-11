@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"main/errorHandling"
 	"main/models"
 	"main/services"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type UserController struct {
@@ -64,9 +65,7 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 		return errorHandling.HandleHTTPError(c, err)
 	}
 
-	return c.JSON(map[string]string{
-		"token": result,
-	})
+	return c.JSON(result)
 }
 
 func (uc *UserController) VerifyOTP(c *fiber.Ctx) error {
