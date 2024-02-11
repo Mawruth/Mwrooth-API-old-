@@ -49,10 +49,16 @@ func GenerateOTP() string {
 
 func ParseOTP(otp string) (string, time.Time) {
 	timestamp := strings.Split(otp, "|")[2]
-	expTime, _ := strconv.ParseInt(strings.Split(otp, "|")[1], 10, 32)
-	rawOTP := strings.Split(otp, "|")[0]
-	timestampAsTime, _ := time.Parse("2006-01-02 15:04:05", timestamp)
-	timestampAsTime.Add(time.Minute * time.Duration(expTime))
+	expTime, err := strconv.ParseInt(strings.Split(otp, "|")[1], 10, 32)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
 
+	rawOTP := strings.Split(otp, "|")[0]
+	timestampAsTime, err := time.Parse("2006-01-02 15:04:05", timestamp)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
+	timestampAsTime = timestampAsTime.Add(time.Minute * time.Duration(expTime))
 	return rawOTP, timestampAsTime
 }
