@@ -68,7 +68,6 @@ func (r *UserRepository) Login(email, password string) (*res.UserRes, error) {
 		Email: user.Email,
 		FullName: user.FullName,
 		UserName: user.UserName,
-		PhoneNumber: user.PhoneNumber,
 		Token: token,
 	}
 
