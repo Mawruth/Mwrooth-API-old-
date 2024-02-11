@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"gopkg.in/gomail.v2"
+	"main/data/res"
 	"main/models"
 	"main/repos"
 	"main/utils"
@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"gopkg.in/gomail.v2"
 )
 
 var (
@@ -47,7 +49,7 @@ func (u *UserService) CreateUser(user *models.User) (*models.User, error) {
 	return u.userRepository.Create(user)
 }
 
-func (u *UserService) Login(email, password string) (string, error) {
+func (u *UserService) Login(email, password string) (*res.UserRes, error) {
 	return u.userRepository.Login(email, password)
 }
 

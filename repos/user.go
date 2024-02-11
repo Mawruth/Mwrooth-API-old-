@@ -2,11 +2,13 @@ package repos
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"main/config"
+	"main/data/res"
 	"main/models"
 	"main/utils"
 	"sync"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -46,19 +48,32 @@ func (r *UserRepository) GetByID(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) Login(email, password string) (string, error) {
+func (r *UserRepository) Login(email, password string) (*res.UserRes, error) {
+	user := &models.User{}
 	if err := r.db.
 		Where("email = ? AND password = ? AND otp is NULL", email, password).
-		First(&models.User{}).Error; err != nil {
-		return "", errors.New("Invalid credentials")
+		First(user).Error; err != nil {
+		return nil, errors.New("Invalid credentials")
 	}
 
 	token, err := utils.GenerateToken(email)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	
+
+	userRes := res.UserRes{
+		ID: user.ID,
+		Email: user.Email,
+		FullName: user.FullName,
+		UserName: user.UserName,
+		PhoneNumber: user.PhoneNumber,
+		Token: token,
+	}
+
+
+	return &userRes, nil
 }
 
 func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
