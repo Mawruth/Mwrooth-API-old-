@@ -5,6 +5,5 @@ type UserRes struct {
 	Email string `json:"email"`
 	FullName string `json:"full_name"`
 	UserName string `json:"user_name"`
-	PhoneNumber string `json:"phone_number"`
 	Token string `json:"token"`
 }
