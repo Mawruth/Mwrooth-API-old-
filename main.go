@@ -20,14 +20,14 @@ func main() {
 		return c.SendString("Hello, World!")
 	})
 
-	config, err := config.LoadConfig()
+	loadConfig, err := config.LoadConfig()
 	if err != nil {
-		fmt.Println("Error loading config:", err)
+		fmt.Println("Error loading loadConfig:", err)
 	}
-	PORT := config.API_PORT
+	PORT := loadConfig.API_PORT
 
-	if err := config.DB.AutoMigrate(
-		&models.User{}, &models.Category{}, &models.Type{}, &models.Museum{}, &models.Piece{}, &models.PieceImages{}, &models.MuseumImages{},&models.Story{},&models.Review{},
+	if err := loadConfig.DB.AutoMigrate(
+		&models.User{}, &models.Category{}, &models.Type{}, &models.Museum{}, &models.Piece{}, &models.PieceImages{}, &models.MuseumImages{}, &models.Story{}, &models.Review{},
 	); err != nil {
 		log.Fatalf("Error running migrations: %s", err.Error())
 	}
@@ -38,5 +38,5 @@ func main() {
 	controllers.SetupStoryRoutes(apiGroup.Group("stories"))
 	controllers.SetupPieceRoute(apiGroup.Group("pieces"))
 	controllers.SetupReviewRoutes(apiGroup.Group("reviews"))
-	app.Listen(PORT)
+	log.Fatalf("Error running server: %s\n", app.Listen(PORT))
 }
