@@ -92,8 +92,14 @@ func (r *UserRepository) Update(user *models.User) (*models.User, error) {
 	if user.UserName != "" {
 		oldUser.UserName = user.UserName
 	}
+	if user.Email != "" {
+		oldUser.Email = user.Email
+	}
 	if user.Password != "" {
 		oldUser.Password = user.Password
+	}
+	if user.Avatar != "" {
+		oldUser.Avatar = user.Avatar
 	}
 	if err := r.db.
 		Save(&oldUser).Error; err != nil {

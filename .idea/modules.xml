@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Mwrooth-API.iml" filepath="$PROJECT_DIR$/.idea/Mwrooth-API.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../awesomeProject1/.idea/awesomeProject1.iml" filepath="$PROJECT_DIR$/../awesomeProject1/.idea/awesomeProject1.iml" />
     </modules>
   </component>
 </project>
