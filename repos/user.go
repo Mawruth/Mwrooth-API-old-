@@ -61,16 +61,13 @@ func (r *UserRepository) Login(email, password string) (*res.UserRes, error) {
 		return nil, err
 	}
 
-	
-
 	userRes := res.UserRes{
-		ID: user.ID,
-		Email: user.Email,
+		ID:       user.ID,
+		Email:    user.Email,
 		FullName: user.FullName,
 		UserName: user.UserName,
-		Token: token,
+		Token:    token,
 	}
-
 
 	return &userRes, nil
 }
@@ -85,9 +82,22 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 }
 
 func (r *UserRepository) Update(user *models.User) (*models.User, error) {
-	err := r.db.Save(user).Error
+	oldUser, err := r.GetByID(int(user.ID))
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	if user.FullName != "" {
+		oldUser.FullName = user.FullName
+	}
+	if user.UserName != "" {
+		oldUser.UserName = user.UserName
+	}
+	if user.Password != "" {
+		oldUser.Password = user.Password
+	}
+	if err := r.db.
+		Save(&oldUser).Error; err != nil {
+		return nil, err
+	}
+	return oldUser, nil
 }

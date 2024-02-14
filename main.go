@@ -5,6 +5,7 @@ import (
 	"log"
 	"main/config"
 	"main/controllers"
+	"main/middlewares"
 	"main/models"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +15,7 @@ func main() {
 	app := fiber.New()
 	app.Static("/", "./uploads")
 	apiGroup := app.Group("/api/v1")
-	// apiGroup.Use(middlewares.CheckAccessToken)
+	apiGroup.Use(middlewares.CheckAccessToken)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")

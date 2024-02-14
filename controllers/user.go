@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"main/errorHandling"
 	"main/models"
 	"main/services"
@@ -23,6 +24,7 @@ func NewUserController() *UserController {
 func SetupUserRoutes(router fiber.Router) {
 	userController := NewUserController()
 	router.Get("/:id", userController.GetUser)
+	router.Patch("/:id", userController.UpdateUser)
 	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
 	router.Post("/login", userController.Login)
 	router.Post("/otp/verify", userController.VerifyOTP)
@@ -101,4 +103,26 @@ func (uc *UserController) ResendOTP(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "OTP resent",
 	})
+}
+
+func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
+	user := &models.User{
+		Model: &gorm.Model{},
+	}
+	if err := c.BodyParser(&user); err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
+	user.ID = uint(id)
+	result, err := uc.userService.UpdateUser(user)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
+	return c.JSON(result)
 }

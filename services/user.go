@@ -116,3 +116,7 @@ func (u *UserService) ResendOTP(email string) error {
 
 	return nil
 }
+
+func (u *UserService) UpdateUser(user *models.User) (*models.User, error) {
+	return u.userRepository.Update(user)
+}
