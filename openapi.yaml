@@ -10,7 +10,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.11
 servers:
-  - url: http://dummy-url/api/v1
+  - url: https://mwruth.onrender.com/api/v1
 tags:
   - name: user
     description: Everything related to users
@@ -36,6 +36,33 @@ paths:
           required: true
           schema:
             type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - user
+      summary: Update an existing user
+      description: Update an existing user by id
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterParams'
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -332,6 +359,8 @@ components:
           type: string
         phone_number:
           type: string
+        avatar:
+          type: string
         createdAt:
           type: string
         updatedAt:
@@ -351,6 +380,8 @@ components:
         password:
           type: string
         phone_number:
+          type: string
+        avatar:
           type: string
     LoginParams:
       type: object
