@@ -9,9 +9,7 @@ import (
 )
 
 var ExceptionEndpoints = []string{
-	"/api/v1/users/register",
-	"/api/v1/users/login",
-	"/api/v1/users/otp",
+	"/api/v1/users",
 	"/api/v1/museums",
 	"/api/v1/pieces",
 	"/api/v1/reviews",
