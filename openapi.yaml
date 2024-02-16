@@ -73,7 +73,7 @@ paths:
         '500':
           description: Internal server error
 
-  /users/{email}:
+  /users/email/{email}:
     get:
       tags:
         - user

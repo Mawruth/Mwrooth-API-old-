@@ -33,8 +33,8 @@ func NewUserController() *UserController {
 func SetupUserRoutes(router fiber.Router) {
 	userController := NewUserController()
 	router.Get("/:id", userController.GetUser)
+	router.Get("/email/:email", userController.GetUserByEmail)
 	router.Patch("/:id", userController.UpdateUser)
-	router.Get("/:email", userController.GetUserByEmail)
 	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
 	router.Post("/login", userController.Login)
 	router.Post("/otp/verify", userController.VerifyOTP)
