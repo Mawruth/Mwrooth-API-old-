@@ -45,28 +45,6 @@ paths:
                 $ref: '#/components/schemas/User'
         '500':
           description: Internal server error
-  /users/{email}:
-    get:
-      tags:
-        - user
-      summary: Get user by email
-      description: Get an existing user by email
-      operationId: getUserByEmail
-      parameters:
-        - name: email
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '500':
-          description: Internal server error
     patch:
       tags:
         - user
@@ -94,6 +72,30 @@ paths:
                 $ref: '#/components/schemas/User'
         '500':
           description: Internal server error
+
+  /users/{email}:
+    get:
+      tags:
+        - user
+      summary: Get user by email
+      description: Get an existing user by email
+      operationId: getUserByEmail
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+
   /users/register:
     post:
       tags:
