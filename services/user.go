@@ -120,3 +120,7 @@ func (u *UserService) ResendOTP(email string) error {
 func (u *UserService) UpdateUser(user *models.User) (*models.User, error) {
 	return u.userRepository.Update(user)
 }
+
+func (u *UserService) GetUserByEmail(email string) (*models.User, error) {
+	return u.userRepository.GetByEmail(email)
+}

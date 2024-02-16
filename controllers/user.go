@@ -34,6 +34,7 @@ func SetupUserRoutes(router fiber.Router) {
 	userController := NewUserController()
 	router.Get("/:id", userController.GetUser)
 	router.Patch("/:id", userController.UpdateUser)
+	router.Get("/:email", userController.GetUserByEmail)
 	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
 	router.Post("/login", userController.Login)
 	router.Post("/otp/verify", userController.VerifyOTP)
@@ -154,6 +155,15 @@ func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(result)
+}
+
+func (uc *UserController) GetUserByEmail(c *fiber.Ctx) error {
+	email := c.Params("email")
+	user, err := uc.userService.GetUserByEmail(email)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+	return c.JSON(user)
 }
 
 func uploadImageToS3(file io.Reader) (string, error) {

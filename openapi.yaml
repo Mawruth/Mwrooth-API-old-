@@ -15,7 +15,7 @@ tags:
   - name: user
     description: Everything related to users
   - name: museum
-    description: Museum-realted information
+    description: Museum-related information
   - name: category
     description: Actions related to museum categories
   - name: type
@@ -23,11 +23,11 @@ tags:
   - name: piece
     description: Information about pieces of the museum
 paths:
-  /users:{userId}:
+  /users/{userId}:
     get:
       tags:
         - user
-      summary: Get an existing user
+      summary: Get user by id
       description: Get an existing user by id
       operationId: getUser
       parameters:
@@ -36,6 +36,28 @@ paths:
           required: true
           schema:
             type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+  /users/{email}:
+    get:
+      tags:
+        - user
+      summary: Get user by email
+      description: Get an existing user by email
+      operationId: getUserByEmail
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
