@@ -7,14 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type TypeRepository struct {
 	db *gorm.DB
 }
 
 func NewTypeRepository() *TypeRepository {
 	db := config.GetDB()
-	return &TypeRepository{db:db}
+	return &TypeRepository{db: db}
 }
 
 func (r *TypeRepository) Create(type_ *models.Type) (*models.Type, error) {
