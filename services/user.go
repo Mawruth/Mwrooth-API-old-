@@ -43,10 +43,11 @@ func (u *UserService) CreateUser(user *models.User) (*models.User, error) {
 	otp += timestamp
 	user.OTP = &otp
 	verificationMsg := utils.GenerateVerificationMessage(rawOTP)
+	result, err := u.userRepository.Create(user)
 	if err := u.SendCode(user.Email, verificationMsg); err != nil {
 		return nil, err
 	}
-	return u.userRepository.Create(user)
+	return result, err
 }
 
 func (u *UserService) Login(email, password string) (*res.UserRes, error) {

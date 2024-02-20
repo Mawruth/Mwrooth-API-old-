@@ -34,7 +34,7 @@ func SetupUserRoutes(router fiber.Router) {
 	userController := NewUserController()
 	router.Get("/:id", userController.GetUser)
 	router.Get("/email/:email", userController.GetUserByEmail)
-	router.Patch("/:id", userController.UpdateUser)
+	router.Patch("/email/:email", userController.UpdateUser)
 	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
 	router.Post("/login", userController.Login)
 	router.Post("/otp/verify", userController.VerifyOTP)
@@ -116,10 +116,7 @@ func (uc *UserController) ResendOTP(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
-	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
-	}
+	email := c.Params("email")
 
 	user := &models.UpdateUserDto{}
 	newUser := &models.User{
@@ -145,7 +142,7 @@ func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
 		newUser.Avatar = avatarUrl
 	}
 
-	newUser.ID = uint(id)
+	newUser.Email = email
 	newUser.FullName = user.FullName
 	newUser.Email = user.Email
 	newUser.Password = user.Password

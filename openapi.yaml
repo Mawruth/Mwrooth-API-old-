@@ -45,33 +45,6 @@ paths:
                 $ref: '#/components/schemas/User'
         '500':
           description: Internal server error
-    patch:
-      tags:
-        - user
-      summary: Update an existing user
-      description: Update an existing user by id
-      operationId: updateUser
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/RegisterParams'
-        required: true
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '500':
-          description: Internal server error
 
   /users/email/{email}:
     get:
@@ -86,6 +59,33 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - user
+      summary: Update an existing user
+      description: Update an existing user by id
+      operationId: updateUser
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterParams'
+        required: true
       responses:
         '200':
           description: Successful operation
