@@ -101,6 +101,9 @@ func (r *UserRepository) Update(user *models.User) (*models.User, error) {
 	if user.Avatar != "" {
 		oldUser.Avatar = user.Avatar
 	}
+		if user.OTP != nil {
+		oldUser.OTP = user.OTP
+	}
 	if err := r.db.
 		Save(&oldUser).Error; err != nil {
 		return nil, err
