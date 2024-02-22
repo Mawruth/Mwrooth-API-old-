@@ -4,17 +4,17 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/h2non/filetype"
-	"gorm.io/gorm"
 	"io"
 	"main/errorHandling"
 	"main/models"
 	"main/services"
 	"os"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/h2non/filetype"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -34,7 +34,7 @@ func SetupUserRoutes(router fiber.Router) {
 	userController := NewUserController()
 	router.Get("/:id", userController.GetUser)
 	router.Get("/email/:email", userController.GetUserByEmail)
-	router.Patch("/email/:email", userController.UpdateUser)
+	router.Patch("/", userController.UpdateUser)
 	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
 	router.Post("/login", userController.Login)
 	router.Post("/otp/verify", userController.VerifyOTP)
@@ -116,16 +116,18 @@ func (uc *UserController) ResendOTP(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
-	email := c.Params("email")
 
-	user := &models.UpdateUserDto{}
-	newUser := &models.User{
-		Model: &gorm.Model{},
-	}
+	var requestData models.UpdateUserDto
 
-	if err := c.BodyParser(user); err != nil {
+	if err := c.BodyParser(&requestData); err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}
+
+	user, err := uc.userService.GetUserByEmail(requestData.Email)
+	if err != nil {
+		return errorHandling.HandleHTTPError(c, err)
+	}
+
 	avatar, err := c.FormFile("avatar")
 	if err == nil {
 		avatarFile, err := avatar.Open()
@@ -139,14 +141,18 @@ func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
 				"message": "Failed to upload image",
 			})
 		}
-		newUser.Avatar = avatarUrl
+		user.Avatar = avatarUrl
 	}
 
-	newUser.Email = email
-	newUser.FullName = user.FullName
-	newUser.Email = user.Email
-	newUser.Password = user.Password
-	result, err := uc.userService.UpdateUser(newUser)
+	if requestData.FullName != "" {
+		user.FullName = requestData.FullName
+	}
+
+	if requestData.Password != "" {
+		user.Password = requestData.Password
+	}
+
+	result, err := uc.userService.UpdateUser(user)
 	if err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}
