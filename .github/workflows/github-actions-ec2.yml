@@ -27,7 +27,9 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v1
+      - name: Build the api
+        run: docker build -t mwruth .
       - name: Stop running api
         run: docker rm -f mwruth
       - name: Run the api
-        run: docker run -d -p 3000:3000 --name mwruth
+        run: docker run -d -p 3000:3000 --name mwruth mwruth
