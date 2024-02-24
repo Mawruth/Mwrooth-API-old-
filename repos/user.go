@@ -82,28 +82,9 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 }
 
 func (r *UserRepository) Update(user *models.User) (*models.User, error) {
-	oldUser, err := r.GetByID(int(user.ID))
-	if err != nil {
-		return nil, err
+	res := r.db.Save(user)
+	if res.Error != nil {
+		return nil, res.Error
 	}
-	if user.FullName != "" {
-		oldUser.FullName = user.FullName
-	}
-	if user.UserName != "" {
-		oldUser.UserName = user.UserName
-	}
-	if user.Email != "" {
-		oldUser.Email = user.Email
-	}
-	if user.Password != "" {
-		oldUser.Password = user.Password
-	}
-	if user.Avatar != "" {
-		oldUser.Avatar = user.Avatar
-	}
-	if err := r.db.
-		Save(&oldUser).Error; err != nil {
-		return nil, err
-	}
-	return oldUser, nil
+	return user, nil
 }

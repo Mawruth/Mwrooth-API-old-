@@ -24,7 +24,7 @@ func (t *TypeService) GetAllTypes() ([]*models.Type, error) {
 	return t.typeRepository.GetAll()
 }
 
-//get type by id
+// get type by id
 func (t *TypeService) GetTypeById(id int) (models.Type, error) {
 	return t.typeRepository.GetById(id)
 }
