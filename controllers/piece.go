@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"fmt"
 	"main/data/req"
 	"main/errorHandling"
 	"main/models"
 	"main/services"
 	"strconv"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type PieceController struct {
@@ -41,36 +38,45 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 		return errorHandling.HandleHTTPError(c, err)
 	}
 
-	fmt.Println(piece)
+	// fmt.Println(piece)
 
 	files := form.File["images"]
 	var images []string
 
 	for _,file := range files {
-		uniqueId := uuid.New()
-		filename := strings.Replace(uniqueId.String(), "-", "", -1)
-		fileExt := strings.Split(file.Filename, ".")[1]
-		image := fmt.Sprintf("%s.%s", filename, fileExt)
-		err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", image))
-		images = append(images, image)
+		// uniqueId := uuid.New()
+		// filename := strings.Replace(uniqueId.String(), "-", "", -1)
+		// fileExt := strings.Split(file.Filename, ".")[1]
+		// image := fmt.Sprintf("%s.%s", filename, fileExt)
+		// err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", image))
+		// images = append(images, image)
+		fileData, err := file.Open()
 		if err != nil {
 			return errorHandling.HandleHTTPError(c, err)
 		}
+		defer fileData.Close()
+		fileUrl, err := uploadImageToS3(fileData)
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"message": "Failed to upload image",
+			})
+		}
+		images = append(images, fileUrl)
 	}
 
-	ar_file := form.File["ar_obj"]
-	var ar_path string
-	for _,file := range ar_file {
-		uniqueId := uuid.New()
-		filename := strings.Replace(uniqueId.String(), "-", "", -1)
-		fileExt := strings.Split(file.Filename, ".")[1]
-		path := fmt.Sprintf("%s.%s", filename, fileExt)
-		err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", path))
-		ar_path = path
-		if err != nil {
-			return errorHandling.HandleHTTPError(c, err)
-		}
-	}
+	// ar_file := form.File["ar_obj"]
+	// var ar_path string
+	// for _,file := range ar_file {
+	// 	uniqueId := uuid.New()
+	// 	filename := strings.Replace(uniqueId.String(), "-", "", -1)
+	// 	fileExt := strings.Split(file.Filename, ".")[1]
+	// 	path := fmt.Sprintf("%s.%s", filename, fileExt)
+	// 	err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", path))
+	// 	ar_path = path
+	// 	if err != nil {
+	// 		return errorHandling.HandleHTTPError(c, err)
+	// 	}
+	// }
 	
 	var pieceImages []models.PieceImages
 
@@ -89,7 +95,7 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 		CategoryID: piece.CategoryID,
 		MuseumID: piece.MuseumID,
 		Images: pieceImages,
-		AR_Path: ar_path,
+		AR_Path: piece.AR_Path,
 	}
 	result, err := pieceController.pieceService.CreatePiece(newPice)
 	if err != nil {
