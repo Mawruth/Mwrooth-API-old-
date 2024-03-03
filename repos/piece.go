@@ -26,7 +26,7 @@ func (r *PieceRepository) Create(piece *models.Piece) (*models.Piece, error) {
 
 func (r *PieceRepository) GetAll() ([]models.Piece, error) {
 	var pieces []models.Piece
-	err := r.db.Find(&pieces).Error
+	err := r.db.Preload("Images").Find(&pieces).Error
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (r *PieceRepository) GetAll() ([]models.Piece, error) {
 
 func (r *PieceRepository) GetById(id int) (models.Piece, error) {
 	var piece models.Piece
-	err := r.db.First(&piece, id).Error
+	err := r.db.Preload("Images").First(&piece, id).Error
 	if err != nil {
 		return models.Piece{}, err
 	}

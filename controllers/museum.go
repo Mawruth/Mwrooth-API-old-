@@ -1,15 +1,12 @@
 package controllers
 
 import (
-	"fmt"
 	"main/data/req"
 	"main/errorHandling"
 	"main/services"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
-	"github.com/google/uuid"
 )
 
 type MuseumController struct {
@@ -44,17 +41,20 @@ func (m *MuseumController) Create(c *fiber.Ctx) error {
 	var images []string
 
 	for _, file := range files {
-		uniqueId := uuid.New()
-		filename := strings.Replace(uniqueId.String(), "-", "", -1)
-		fileExt := strings.Split(file.Filename, ".")[1]
-		image := fmt.Sprintf("%s.%s", filename, fileExt)
-		err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", image))
+		fileData, err := file.Open()
 		if err != nil {
 			return errorHandling.HandleHTTPError(c, err)
 		}
-		images = append(images, image)
-		museumReq.Images = images
+		defer fileData.Close()
+		fileUrl, err := uploadImageToS3(fileData)
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"message": "Failed to upload image",
+			})
+		}
+		images = append(images, fileUrl)
 	}
+	museumReq.Images = images
 	result, _ := m.museumService.CreateMuseum(museumReq)
 
 	return c.JSON(result)
