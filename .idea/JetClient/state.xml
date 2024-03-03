@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JetClientState">
+    <option name="folders">
+      <list>
+        <folderState>
+          <option name="id" value="f300f573-3340-408a-9a48-ce231c0c914e" />
+          <option name="name" value="Mwruth" />
+          <option name="requests">
+            <list>
+              <requestState>
+                <option name="body">
+                  <bodyState>
+                    <option name="raw" value="{&#10;  &quot;user_name&quot;: &quot;Pandaa&quot;,&#10;  &quot;email&quot;: &quot;abidal105@gmail.com&quot;,&#10;  &quot;phone_number&quot;: &quot;010000202&quot;,&#10;  &quot;password&quot;: &quot;123456789&quot;&#10;}" />
+                    <option name="type" value="JSON" />
+                  </bodyState>
+                </option>
+                <option name="headers">
+                  <list>
+                    <headerState>
+                      <option name="key" value="Content-Type" />
+                      <option name="value" value="application/json" />
+                    </headerState>
+                  </list>
+                </option>
+                <option name="id" value="2a5d954c-8f94-4f7f-bfa0-156697858daa" />
+                <option name="method" value="POST" />
+                <option name="name" value="Register" />
+                <option name="url" value="http://localhost:3000/api/v1/users/register" />
+              </requestState>
+              <requestState>
+                <option name="body">
+                  <bodyState>
+                    <option name="raw" value="{&#10;  &quot;email&quot;: &quot;abidal105@gmail.com&quot;,&#10;  &quot;password&quot;: &quot;123456789&quot;&#10;}" />
+                    <option name="type" value="JSON" />
+                  </bodyState>
+                </option>
+                <option name="headers">
+                  <list>
+                    <headerState>
+                      <option name="key" value="Content-Type" />
+                      <option name="value" value="application/json" />
+                    </headerState>
+                  </list>
+                </option>
+                <option name="id" value="3bc11e86-5150-416a-a1e8-fb56bab35676" />
+                <option name="method" value="POST" />
+                <option name="name" value="Login" />
+                <option name="url" value="http://localhost:3000/api/v1/users/login" />
+              </requestState>
+              <requestState>
+                <option name="body">
+                  <bodyState>
+                    <option name="raw" value="{&#10;  &quot;email&quot;: &quot;abidal105@gmail.com&quot;,&#10;  &quot;otp&quot;: &quot;9814&quot;&#10;}" />
+                    <option name="type" value="JSON" />
+                  </bodyState>
+                </option>
+                <option name="headers">
+                  <list>
+                    <headerState>
+                      <option name="key" value="Content-Type" />
+                      <option name="value" value="application/json" />
+                    </headerState>
+                  </list>
+                </option>
+                <option name="id" value="7d3c4638-f3c2-45a1-99c2-23fce09927a6" />
+                <option name="method" value="POST" />
+                <option name="name" value="Verify otp" />
+                <option name="url" value="http://localhost:3000/api/v1/users/otp/verify" />
+              </requestState>
+              <requestState>
+                <option name="auth">
+                  <authState>
+                    <option name="type" value="NO_AUTH" />
+                  </authState>
+                </option>
+                <option name="headers">
+                  <list>
+                    <headerState>
+                      <option name="key" value="Authorization" />
+                      <option name="value" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiaWRhbDEwNUBnbWFpbC5jb20iLCJleHAiOjE3MTAwMjM5MjMsInJvbGUiOiJVU0VSIn0.2A3dAzcrVCerX5Z4j7-7m9bZfAP234IBQblHzN96D7w" />
+                    </headerState>
+                  </list>
+                </option>
+                <option name="id" value="37ba750a-d4cb-4d8a-8641-6849d72ed3f6" />
+                <option name="method" value="GET" />
+                <option name="name" value="Get user by id" />
+                <option name="url" value="http://localhost:3000/api/v1/users/1" />
+              </requestState>
+            </list>
+          </option>
+          <option name="sortWeight" value="1000000" />
+          <option name="syncProperties">
+            <synchronizationPropertiesState>
+              <option name="folderPath" value="$PROJECT_DIR$/.jetclient" />
+            </synchronizationPropertiesState>
+          </option>
+          <option name="variables">
+            <variablesState>
+              <option name="json" value="{&#10;  &quot;baseUrl&quot;: &quot;localhost: 3000&quot;&#10;}" />
+            </variablesState>
+          </option>
+        </folderState>
+      </list>
+    </option>
+    <option name="id" value="3e48f8ea-63bc-4973-9922-41c7bae878ce" />
+  </component>
+</project>
