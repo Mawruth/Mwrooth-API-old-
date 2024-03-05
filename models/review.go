@@ -10,3 +10,16 @@ type Review struct {
 	Creator  *User   `json:"creator" gorm:"-"`
 	Rating   float32 `json:"rating" validate:"required"`
 }
+
+func (r Review) AfterCreate(tx *gorm.DB) error {
+	var newRating float64
+	err := tx.Raw("select AVG(rating) from reviews where museum_id = ?", r.MuseumID).Scan(&newRating).Error
+	if err != nil {
+		return err
+	}
+	err = tx.Model(&Museum{}).Where("id = ?", r.MuseumID).Update("rating", newRating).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
