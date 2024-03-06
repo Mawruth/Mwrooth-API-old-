@@ -23,7 +23,7 @@ func (s *ReviewService) GetAllReviews() (*[]models.Review, error) {
 	return s.ReviewRepository.GetAllReviews()
 }
 
-func (s *ReviewService) GetReviewByMuseum(museumId int) (*models.Review, error) {
+func (s *ReviewService) GetReviewByMuseum(museumId int) (*[]models.Review, error) {
 	return s.ReviewRepository.GetReviewByMuseum(museumId)
 }
 
