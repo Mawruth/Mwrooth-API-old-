@@ -7,7 +7,7 @@ type Review struct {
 	UserId   uint    `json:"user_id" validate:"required"`
 	MuseumID uint    `json:"museum_id" validate:"required"`
 	Content  string  `json:"content" validate:"required"`
-	Creator  *User   `json:"creator" gorm:"-"`
+	Creator  *User   `json:"creator" gorm:"foreignKey:UserId"`
 	Rating   float32 `json:"rating" validate:"required"`
 }
 

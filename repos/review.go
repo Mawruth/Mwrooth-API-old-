@@ -30,35 +30,22 @@ func (r *ReviewRepository) Create(Review *models.Review) (*models.Review, error)
 	return Review, nil
 }
 
-func (r *ReviewRepository) GetReviewByMuseum(museumId int) (*models.Review, error) {
-	var Review models.Review
-	err := r.db.Where("museum_id = ?", museumId).First(&Review).Error
+func (r *ReviewRepository) GetReviewByMuseum(museumId int) (*[]models.Review, error) {
+	var Review []models.Review
+	err := r.db.Preload("Creator").Where("museum_id = ?", museumId).Find(&Review).Error
 	if err != nil {
 		return nil, err
 	}
-	var creator *models.User
-	err = r.db.Where("id = ?", Review.UserId).First(&creator).Error
-	if err != nil {
-		return nil, err
-	}
-	Review.Creator = creator
 	return &Review, nil
 }
 
 func (r *ReviewRepository) GetAllReviews() (*[]models.Review, error) {
 	var Reviews []models.Review
-	err := r.db.Find(&Reviews).Error
+	err := r.db.Preload("Creator").Find(&Reviews).Error
 	if err != nil {
 		return nil, err
 	}
-	for i := range Reviews {
-		var creator *models.User
-		err = r.db.Where("id = ?", Reviews[i].UserId).First(&creator).Error
-		if err != nil {
-			return nil, err
-		}
-		Reviews[i].Creator = creator
-	}
+	
 	return &Reviews, nil
 }
 
