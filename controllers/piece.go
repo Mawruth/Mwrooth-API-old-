@@ -33,7 +33,7 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 		return errorHandling.HandleHTTPError(c, err)
 	}
 
-	form, err := c.MultipartForm();
+	form, err := c.MultipartForm()
 	if err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}
@@ -43,7 +43,7 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 	files := form.File["images"]
 	var images []string
 
-	for _,file := range files {
+	for _, file := range files {
 		// uniqueId := uuid.New()
 		// filename := strings.Replace(uniqueId.String(), "-", "", -1)
 		// fileExt := strings.Split(file.Filename, ".")[1]
@@ -77,25 +77,24 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 	// 		return errorHandling.HandleHTTPError(c, err)
 	// 	}
 	// }
-	
-	var pieceImages []models.PieceImages
 
-	for _,img := range images {
-		piceImage := models.PieceImages{
-			Image_path: img,
+	var pieceImages []models.PieceImage
+
+	for _, img := range images {
+		piceImage := models.PieceImage{
+			ImagePath: img,
 		}
 		pieceImages = append(pieceImages, piceImage)
 	}
 
-
 	newPice := models.Piece{
-		Name: piece.Name,
+		Name:        piece.Name,
 		Description: piece.Description,
-		Master_piece: piece.Master_piece,
-		CategoryID: piece.CategoryID,
-		MuseumID: piece.MuseumID,
-		Images: pieceImages,
-		AR_Path: piece.AR_Path,
+		MasterPiece: piece.MasterPiece,
+		CategoryID:  piece.CategoryID,
+		MuseumID:    piece.MuseumID,
+		Images:      pieceImages,
+		ARPath:      piece.ARPath,
 	}
 	result, err := pieceController.pieceService.CreatePiece(newPice)
 	if err != nil {
@@ -135,7 +134,7 @@ func (pieceController *PieceController) MakeMasterPiece(c *fiber.Ctx) error {
 	if err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}
-	piece.Master_piece = true
+	piece.MasterPiece = true
 	if _, err := pieceController.pieceService.UpdatePiece(&piece); err != nil {
 		return errorHandling.HandleHTTPError(c, err)
 	}

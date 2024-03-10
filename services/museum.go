@@ -28,10 +28,10 @@ func (m *MuseumService) CreateMuseum(museum req.MuseumReq) (*models.Museum, erro
 	}
 
 	// add all images
-	var images []models.MuseumImages
+	var images []models.MuseumImage
 	for _, image := range museum.Images {
-		images = append(images, models.MuseumImages{
-			Image_path: image,
+		images = append(images, models.MuseumImage{
+			ImagePath: image,
 		})
 	}
 
