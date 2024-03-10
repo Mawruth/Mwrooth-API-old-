@@ -1,15 +1,12 @@
 package controllers
 
 import (
-	"fmt"
+	"github.com/gin-gonic/gin"
 	"main/data/req"
-	"main/errorHandling"
 	"main/models"
 	"main/services"
-	"strings"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"main/utils"
+	"net/http"
 )
 
 type StoryController struct {
@@ -21,46 +18,60 @@ func NewStoryController() *StoryController {
 	return &StoryController{StoryService: StoryService}
 }
 
-func SetupStoryRoutes(router fiber.Router) {
-	StoryController := NewStoryController()
-	router.Post("/", StoryController.Create)
-	router.Get("/", StoryController.GetAllStories)
+func SetupStoryRoutes(router *gin.RouterGroup) {
+	storyController := NewStoryController()
+	router.POST("/", storyController.Create)
+	router.GET("/", storyController.GetAllStories)
 }
 
-func (cat *StoryController) Create(c *fiber.Ctx) error {
+func (cat *StoryController) Create(c *gin.Context) {
 	var StoryReq req.StoryReq
-	if err := c.BodyParser(&StoryReq); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&StoryReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
-	file,err := c.FormFile("image")
+	multipartFile, err := c.FormFile("image")
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
-	uniqueId := uuid.New()
-	filename := strings.Replace(uniqueId.String(), "-", "", -1)
-	fileExt := strings.Split(file.Filename, ".")[1]
-	image := fmt.Sprintf("%s.%s", filename, fileExt)
-	err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", image))
+	file, err := multipartFile.Open()
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
+	defer file.Close()
+
+	filePath, err := utils.UploadImageToS3(file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	Story := models.Story{
-		Name: StoryReq.Name,
-		ImagePath: image,
+		Name:      StoryReq.Name,
+		ImagePath: filePath,
 	}
 	result, err := cat.StoryService.Create(&Story)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }
 
-func (cat *StoryController) GetAllStories(c *fiber.Ctx) error {
+func (cat *StoryController) GetAllStories(c *gin.Context) {
 	result, err := cat.StoryService.GetAllStories()
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }

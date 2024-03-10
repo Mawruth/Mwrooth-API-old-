@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"main/errorHandling"
+	"github.com/gin-gonic/gin"
 	"main/models"
 	"main/services"
+	"net/http"
 	"strconv"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type ReviewController struct {
@@ -18,56 +17,71 @@ func NewReviewController() *ReviewController {
 	return &ReviewController{ReviewService: ReviewService}
 }
 
-func SetupReviewRoutes(router fiber.Router) {
-	ReviewController := NewReviewController()
-	router.Post("/", ReviewController.Create)
-	router.Get("/", ReviewController.GetAllReviews)
-	router.Get("/museum/:id", ReviewController.GetReviewByMuseum)
-	router.Put("/:id", ReviewController.Update)
+func SetupReviewRoutes(router *gin.RouterGroup) {
+	reviewController := NewReviewController()
+	router.POST("/", reviewController.Create)
+	router.GET("/", reviewController.GetAllReviews)
+	router.GET("/museum/:id", reviewController.GetReviewByMuseum)
+	router.PUT("/:id", reviewController.Update)
 }
 
-func (cat *ReviewController) Create(c *fiber.Ctx) error {
+func (cat *ReviewController) Create(c *gin.Context) {
 	var ReviewReq models.Review
-	if err := c.BodyParser(&ReviewReq); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&ReviewReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	result, err := cat.ReviewService.Create(&ReviewReq)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }
 
-func (cat *ReviewController) GetAllReviews(c *fiber.Ctx) error {
+func (cat *ReviewController) GetAllReviews(c *gin.Context) {
 	result, err := cat.ReviewService.GetAllReviews()
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }
 
-func (cat *ReviewController) GetReviewByMuseum(c *fiber.Ctx) error {
-	id := c.Params("id")
-	museumId, err := strconv.Atoi(id)
+func (cat *ReviewController) GetReviewByMuseum(c *gin.Context) {
+	museumId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	result, err := cat.ReviewService.GetReviewByMuseum(museumId)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+
+	c.JSON(http.StatusOK, result)
 }
 
-func (cat *ReviewController) Update(c *fiber.Ctx) error {
+func (cat *ReviewController) Update(c *gin.Context) {
 	var Review *models.Review
-	if err := c.BodyParser(&Review); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&Review); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	result, err := cat.ReviewService.Update(Review)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+
+	c.JSON(http.StatusOK, result)
 }

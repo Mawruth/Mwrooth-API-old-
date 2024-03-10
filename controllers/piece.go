@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
 	"main/data/req"
-	"main/errorHandling"
 	"main/models"
 	"main/services"
+	"main/utils"
+	"net/http"
 	"strconv"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type PieceController struct {
@@ -19,75 +19,59 @@ func NewPieceController() *PieceController {
 	return &PieceController{pieceService: pieceService}
 }
 
-func SetupPieceRoute(route fiber.Router) {
+func SetupPieceRoute(route *gin.RouterGroup) {
 	pieceController := NewPieceController()
-	route.Post("/", pieceController.Create)
-	route.Get("/", pieceController.GetAll)
-	route.Get("/master-piece/:id", pieceController.MakeMasterPiece)
-	route.Get("/:id", pieceController.GetById)
+	route.POST("/", pieceController.Create)
+	route.GET("/", pieceController.GetAll)
+	route.GET("/master-piece/:id", pieceController.MakeMasterPiece)
+	route.GET("/:id", pieceController.GetById)
 }
 
-func (pieceController *PieceController) Create(c *fiber.Ctx) error {
+func (pieceController *PieceController) Create(c *gin.Context) {
 	var piece req.PieceReq
-	if err := c.BodyParser(&piece); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&piece); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	form, err := c.MultipartForm()
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
-
-	// fmt.Println(piece)
 
 	files := form.File["images"]
 	var images []string
 
 	for _, file := range files {
-		// uniqueId := uuid.New()
-		// filename := strings.Replace(uniqueId.String(), "-", "", -1)
-		// fileExt := strings.Split(file.Filename, ".")[1]
-		// image := fmt.Sprintf("%s.%s", filename, fileExt)
-		// err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", image))
-		// images = append(images, image)
 		fileData, err := file.Open()
 		if err != nil {
-			return errorHandling.HandleHTTPError(c, err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
 		}
 		defer fileData.Close()
-		fileUrl, err := uploadImageToS3(fileData)
+		fileUrl, err := utils.UploadImageToS3(fileData)
 		if err != nil {
-			return c.JSON(fiber.Map{
+			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Failed to upload image",
 			})
 		}
 		images = append(images, fileUrl)
 	}
 
-	// ar_file := form.File["ar_obj"]
-	// var ar_path string
-	// for _,file := range ar_file {
-	// 	uniqueId := uuid.New()
-	// 	filename := strings.Replace(uniqueId.String(), "-", "", -1)
-	// 	fileExt := strings.Split(file.Filename, ".")[1]
-	// 	path := fmt.Sprintf("%s.%s", filename, fileExt)
-	// 	err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", path))
-	// 	ar_path = path
-	// 	if err != nil {
-	// 		return errorHandling.HandleHTTPError(c, err)
-	// 	}
-	// }
-
 	var pieceImages []models.PieceImage
 
 	for _, img := range images {
-		piceImage := models.PieceImage{
+		pieceImage := models.PieceImage{
 			ImagePath: img,
 		}
-		pieceImages = append(pieceImages, piceImage)
+		pieceImages = append(pieceImages, pieceImage)
 	}
 
-	newPice := models.Piece{
+	newPiece := models.Piece{
 		Name:        piece.Name,
 		Description: piece.Description,
 		MasterPiece: piece.MasterPiece,
@@ -96,47 +80,62 @@ func (pieceController *PieceController) Create(c *fiber.Ctx) error {
 		Images:      pieceImages,
 		ARPath:      piece.ARPath,
 	}
-	result, err := pieceController.pieceService.CreatePiece(newPice)
+	result, err := pieceController.pieceService.CreatePiece(newPiece)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+
+	c.JSON(http.StatusOK, result)
 }
 
-func (pieceController *PieceController) GetAll(c *fiber.Ctx) error {
+func (pieceController *PieceController) GetAll(c *gin.Context) {
 	pieces, err := pieceController.pieceService.GetAllPieces()
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(pieces)
+
+	c.JSON(http.StatusOK, pieces)
 }
 
-func (pieceController *PieceController) GetById(c *fiber.Ctx) error {
-	id := c.Params("id")
-	idInt, err := strconv.Atoi(id)
+func (pieceController *PieceController) GetById(c *gin.Context) {
+	idInt, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	piece, err := pieceController.pieceService.GetPieceById(idInt)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(piece)
+	c.JSON(http.StatusOK, piece)
 }
 
-func (pieceController *PieceController) MakeMasterPiece(c *fiber.Ctx) error {
-	id := c.Params("id")
-	idInt, err := strconv.Atoi(id)
+func (pieceController *PieceController) MakeMasterPiece(c *gin.Context) {
+	idInt, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	piece, err := pieceController.pieceService.GetPieceById(idInt)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 	piece.MasterPiece = true
 	if _, err := pieceController.pieceService.UpdatePiece(&piece); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(piece)
+
+	c.JSON(http.StatusOK, piece)
 }

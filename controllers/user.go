@@ -1,22 +1,13 @@
 package controllers
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"io"
+	"github.com/gin-gonic/gin"
 	"main/errorHandling"
 	"main/models"
 	"main/services"
-	"os"
-	"time"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/h2non/filetype"
-
-	"github.com/gofiber/fiber/v2"
+	"main/utils"
+	"net/http"
+	"strconv"
 )
 
 type UserController struct {
@@ -30,114 +21,147 @@ func NewUserController() *UserController {
 	}
 }
 
-func SetupUserRoutes(router fiber.Router) {
+func SetupUserRoutes(router *gin.RouterGroup) {
 	userController := NewUserController()
-	router.Get("/:id", userController.GetUser)
-	router.Get("/email/:email", userController.GetUserByEmail)
-	router.Patch("/", userController.UpdateUser)
-	router.Post("/register", errorHandling.ValidateRegister, userController.Register)
-	router.Post("/login", userController.Login)
-	router.Post("/otp/verify", userController.VerifyOTP)
-	router.Post("/otp/resend", userController.ResendOTP)
+	router.GET("/:id", userController.GetUser)
+	router.GET("/email/:email", userController.GetUserByEmail)
+	router.PATCH("/", userController.UpdateUser)
+	router.POST("/register", errorHandling.ValidateRegister, userController.Register)
+	router.POST("/login", userController.Login)
+	router.POST("/otp/verify", userController.VerifyOTP)
+	router.POST("/otp/resend", userController.ResendOTP)
 }
 
-func (uc *UserController) GetUser(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+func (uc *UserController) GetUser(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	user, err := uc.userService.GetUser(id)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(user)
+	c.JSON(http.StatusOK, user)
 }
 
-func (uc *UserController) Register(c *fiber.Ctx) error {
+func (uc *UserController) Register(c *gin.Context) {
 	var user *models.User
-	c.BodyParser(&user)
+	if err := c.Bind(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
 	result, err := uc.userService.CreateUser(user)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(result)
+	c.JSON(http.StatusCreated, result)
 }
 
-func (uc *UserController) Login(c *fiber.Ctx) error {
+func (uc *UserController) Login(c *gin.Context) {
 	var user *models.User
-	if err := c.BodyParser(&user); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	if user.Email == "" || user.Password == "" {
-		return errorHandling.HandleHTTPError(c, errors.New("email and password are required"))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "email and password are required",
+		})
 	}
 	result, err := uc.userService.Login(user.Email, user.Password)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }
 
-func (uc *UserController) VerifyOTP(c *fiber.Ctx) error {
-	var body fiber.Map
-	if err := c.BodyParser(&body); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+func (uc *UserController) VerifyOTP(c *gin.Context) {
+	var body map[string]interface{}
+	if err := c.Bind(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	if _, ok := body["email"].(string); !ok {
-		return errorHandling.HandleHTTPError(c, errors.New("Enter a valid email"))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "enter a valid email",
+		})
 	}
 	if _, ok := body["otp"].(string); !ok {
-		return errorHandling.HandleHTTPError(c, errors.New("Enter a valid otp"))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "enter a valid otp",
+		})
 	}
 	if err := uc.userService.VerifyOTP(body["email"].(string), body["otp"].(string)); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "OTP verified",
+	c.JSON(http.StatusOK, gin.H{
+		"message": "otp verified",
 	})
 }
 
-func (uc *UserController) ResendOTP(c *fiber.Ctx) error {
-	var body fiber.Map
-	if err := c.BodyParser(&body); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+func (uc *UserController) ResendOTP(c *gin.Context) {
+	var body map[string]interface{}
+	if err := c.Bind(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 	if err := uc.userService.ResendOTP(body["email"].(string)); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "OTP resent",
+	c.JSON(http.StatusOK, gin.H{
+		"message": "otp resent successfully",
 	})
 }
 
-func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
-
+func (uc *UserController) UpdateUser(c *gin.Context) {
 	var requestData models.UpdateUserDto
 
-	if err := c.BodyParser(&requestData); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	user, err := uc.userService.GetUserByEmail(requestData.Email)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	avatar, err := c.FormFile("avatar")
 	if err == nil {
 		avatarFile, err := avatar.Open()
 		if err != nil {
-			return errorHandling.HandleHTTPError(c, err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
 		}
 		defer avatarFile.Close()
-		avatarUrl, err := uploadImageToS3(avatarFile)
+		avatarUrl, err := utils.UploadImageToS3(avatarFile)
 		if err != nil {
-			return c.JSON(fiber.Map{
+			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Failed to upload image",
 			})
 		}
@@ -154,75 +178,21 @@ func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
 
 	result, err := uc.userService.UpdateUser(user)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }
 
-func (uc *UserController) GetUserByEmail(c *fiber.Ctx) error {
-	email := c.Params("email")
+func (uc *UserController) GetUserByEmail(c *gin.Context) {
+	email := c.Param("email")
 	user, err := uc.userService.GetUserByEmail(email)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(user)
-}
-
-func uploadImageToS3(file io.Reader) (string, error) {
-	allowedExtensions := []string{"jpg", "jpeg", "png"}
-
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("S3_REGION")),
-	})
-	if err != nil {
-		return "", err
-	}
-	fmt.Println(sess.Config.Credentials.Get())
-
-	buf, err := io.ReadAll(file)
-	if err != nil {
-		return "", err
-	}
-
-	if len(buf) > 1e7 {
-		return "", fmt.Errorf("File size is exceeds 2MB limit")
-	}
-
-	kind, _ := filetype.Match(buf)
-	if !contains(allowedExtensions, kind.Extension) {
-		return "", fmt.Errorf("Unsupported file type. please upload jpg, jpeg or png")
-	}
-
-	uploader := s3manager.NewUploader(sess)
-	extension := kind.Extension
-	fileName := generateUniqueTimestamp() + "." + extension
-
-	upParams := &s3manager.UploadInput{
-		Bucket:      aws.String(os.Getenv("S3_BUCKET")),
-		Key:         aws.String(fmt.Sprintf("%s", fileName)),
-		Body:        bytes.NewReader(buf),
-		ContentType: aws.String(kind.MIME.Value),
-		ACL:         aws.String("public-read"),
-	}
-
-	result, err := uploader.Upload(upParams)
-	if err != nil {
-		return "", fmt.Errorf("failed to upload file, %v", err)
-	}
-
-	return result.Location, nil
-}
-
-func generateUniqueTimestamp() string {
-	return fmt.Sprintf("%d", time.Now().UnixNano())
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
+	c.JSON(http.StatusOK, user)
 }
