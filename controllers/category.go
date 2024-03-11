@@ -1,12 +1,11 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
 	"main/data/req"
-	"main/errorHandling"
 	"main/models"
 	"main/services"
-
-	"github.com/gofiber/fiber/v2"
+	"net/http"
 )
 
 type CategoryController struct {
@@ -18,15 +17,17 @@ func NewCategoryController() *CategoryController {
 	return &CategoryController{categoryService: categoryService}
 }
 
-func SetupCategoryRoutes(router fiber.Router) {
+func SetupCategoryRoutes(router *gin.RouterGroup) {
 	categoryController := NewCategoryController()
-	router.Post("/", categoryController.Create)
+	router.POST("/", categoryController.Create)
 }
 
-func (cat *CategoryController) Create(c *fiber.Ctx) error {
+func (cat *CategoryController) Create(c *gin.Context) {
 	var categoryReq req.CategoryReq
-	if err := c.BodyParser(&categoryReq); err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+	if err := c.Bind(&categoryReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
 
 	// file,err := c.FormFile("image")
@@ -48,7 +49,9 @@ func (cat *CategoryController) Create(c *fiber.Ctx) error {
 	}
 	result, err := cat.categoryService.Create(&category)
 	if err != nil {
-		return errorHandling.HandleHTTPError(c, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 	}
-	return c.JSON(result)
+	c.JSON(http.StatusOK, result)
 }

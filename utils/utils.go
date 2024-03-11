@@ -1,8 +1,13 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/h2non/filetype"
 	"io"
 	"math/rand"
 	"os"
@@ -61,4 +66,62 @@ func ParseOTP(otp string) (string, time.Time) {
 	}
 	timestampAsTime = timestampAsTime.Add(time.Minute * time.Duration(expTime))
 	return rawOTP, timestampAsTime
+}
+
+func UploadImageToS3(file io.Reader) (string, error) {
+	allowedExtensions := []string{"jpg", "jpeg", "png"}
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(os.Getenv("S3_REGION")),
+	})
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(sess.Config.Credentials.Get())
+
+	buf, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+
+	if len(buf) > 1e7 {
+		return "", fmt.Errorf("File size is exceeds 2MB limit")
+	}
+
+	kind, _ := filetype.Match(buf)
+	if !contains(allowedExtensions, kind.Extension) {
+		return "", fmt.Errorf("Unsupported file type. please upload jpg, jpeg or png")
+	}
+
+	uploader := s3manager.NewUploader(sess)
+	extension := kind.Extension
+	fileName := generateUniqueTimestamp() + "." + extension
+
+	upParams := &s3manager.UploadInput{
+		Bucket:      aws.String(os.Getenv("S3_BUCKET")),
+		Key:         aws.String(fmt.Sprintf("%s", fileName)),
+		Body:        bytes.NewReader(buf),
+		ContentType: aws.String(kind.MIME.Value),
+		ACL:         aws.String("public-read"),
+	}
+
+	result, err := uploader.Upload(upParams)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload file, %v", err)
+	}
+
+	return result.Location, nil
+}
+
+func generateUniqueTimestamp() string {
+	return fmt.Sprintf("%d", time.Now().UnixNano())
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

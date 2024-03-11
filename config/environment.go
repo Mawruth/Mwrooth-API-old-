@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"gorm.io/gorm/logger"
 	"os"
 	"sync"
 
@@ -46,7 +47,9 @@ func LoadConfig() (*Config, error) {
 			os.Getenv("DB_NAME"),
 			os.Getenv("DB_PORT"),
 		)
-		db, err = gorm.Open(postgres.Open(dsn))
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Error),
+		})
 		if err != nil {
 			err = fmt.Errorf("Error connecting to database: %w", err)
 		}

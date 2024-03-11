@@ -1,9 +1,10 @@
 package errorHandling
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 	"main/models"
+	"net/http"
 )
 
 type IError struct {
@@ -14,16 +15,10 @@ type IError struct {
 
 var Validator = validator.New()
 
-func HandleHTTPError(c *fiber.Ctx, err error) error {
-	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-		"error": err.Error(),
-	})
-}
-
-func ValidateRegister(c *fiber.Ctx) error {
+func ValidateRegister(c *gin.Context) {
 	var errors []*IError
 	body := new(models.User)
-	c.BodyParser(&body)
+	c.Bind(&body)
 
 	err := Validator.Struct(body)
 	if err != nil {
@@ -34,7 +29,7 @@ func ValidateRegister(c *fiber.Ctx) error {
 			el.Value = err.Param()
 			errors = append(errors, &el)
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(errors)
+		c.JSON(http.StatusBadRequest, errors)
 	}
-	return c.Next()
+	c.Next()
 }
