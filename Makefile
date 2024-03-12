@@ -3,6 +3,7 @@ SHELL := /bin/bash
 .PHONY: build, run*, kill
 
 build:
+	docker image rm -f mwruth
 	docker build -t mwruth .
 run:
 	docker run -p 3000:3000 --name mwruth mwruth
