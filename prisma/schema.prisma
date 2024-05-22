@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  fullName  String
+  userName  String   @unique
+  email     String   @unique
+  password  String
+  otp       String?
+  avatar    String?
+  Review    Review[]
+}
+
+model Story {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String   @unique
+  description String
+  imagePath   String
+  museum      Museum   @relation(fields: [museumID], references: [id])
+  museumID    Int
+}
+
+model Museum {
+  id          Int           @id @default(autoincrement())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  name        String        @unique
+  description String
+  workTime    String
+  country     String
+  city        String
+  street      String
+  rating      Float
+  types       Type[]        @relation()
+  pieces      Piece[]       @relation()
+  images      MuseumImage[] @relation()
+  reviews     Review[]      @relation()
+  Story       Story[]
+}
+
+model Piece {
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  name        String       @unique
+  description String
+  arPath      String?
+  masterPiece Boolean
+  images      PieceImage[] @relation()
+  museum      Museum       @relation(fields: [museumID], references: [id])
+  museumID    Int
+  category    Category     @relation(fields: [categoryID], references: [id])
+  categoryID  Int
+}
+
+model Type {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  museums   Museum[] @relation()
+  image     String?
+}
+
+model PieceImage {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  imagePath String
+  piece     Piece    @relation(fields: [pieceID], references: [id])
+  pieceID   Int
+}
+
+model MuseumImage {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  imagePath String
+  museum    Museum   @relation(fields: [museumID], references: [id])
+  museumID  Int
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
+  rating    Float
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  museum    Museum   @relation(fields: [museumId], references: [id])
+  museumId  Int
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  imagePath String
+  pieces    Piece[]  @relation()
+}
