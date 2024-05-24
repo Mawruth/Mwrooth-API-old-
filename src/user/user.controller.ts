@@ -10,27 +10,43 @@ export class UserController {
   ) { }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<User> {
-    return this.userService.findOne(+id);
+  async findOneById(@Param('id') id: string): Promise<User> {
+    return this.userService.findOneById(+id);
   }
 
+  @Get(':email')
+  async findOneByEmail(@Param('email') email: string): Promise<User> {
+    return this.userService.findOneByEmail(email);
+  }
+
+
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.userService.delete(+id);
+  }
+
+  @Post()
+  async resendOtp(@Body() data: { email: string }): Promise<string | Error> {
+    return this.userService.resendOtp(data.email);
+  }
+
+  @Post()
+  async verifyOtp(@Body() data: { email: string, otp: string }): Promise<string | Error> {
+    return this.userService.verifyOtp(data.email, data.otp);
   }
 }
